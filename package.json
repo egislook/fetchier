@@ -1,0 +1,19 @@
+{
+  "name": "fetchier",
+  "version": "0.0.0",
+  "description": "data fetch wrapper",
+  "main": "fetchier.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node",
+    "websockets",
+    "api"
+  ],
+  "author": "egislook",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.2.1"
+  }
+}
