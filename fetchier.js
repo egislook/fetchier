@@ -5,20 +5,28 @@ module.exports.GET = GET;
 module.exports.wsGQL = wsGQL;
 module.exports.fetch = fetch;
 
+let webSocket;
+
+const GQL_URL = 'https://api.graph.cool/simple/v1/';
+const WSS_URL = 'wss://subscriptions.ap-northeast-1.graph.cool/v1/';
+const WSS_PROTOCOL = 'graphql-subscriptions';
+
 async function GET({ url, body, method = 'GET', debug }){
   if(!url) 
     throw new Error('url is missing');
     
-  const res = await fetch(url, { method, body: JSON.stringify(body) });
-  const json = await res.json();
-  debug && console.log('Fetchier GET:', { json });
-  return json;
+  try{
+    const res = await fetch(url, { method, body: JSON.stringify(body) });
+    const json = await res.json();
+    debug && console.log('Fetchier GET:', { json });
+    return json;
+  } catch(error){ throw error }
 }
 
 async function GQL({ query, GQ, token, variables, debug }){
   GQ = typeof ENV === 'object' && ENV.GQ || GQ;
   
-  const url = 'https://api.graph.cool/simple/v1/' + GQ;
+  const url = GQL_URL + GQ;
   
   const opts = {
     method: 'POST',
@@ -73,10 +81,15 @@ async function GQL({ query, GQ, token, variables, debug }){
 //   })
 // }
 
-function wsGQL({ GQ, token, queries = [], action, debug }) {
+function wsGQL({ GQ, token, queries = [], action, debug }, cb) {
   GQ = typeof ENV === 'object' && ENV.GQ || GQ;
   
-  const webSocket = new WebSocket('wss://subscriptions.ap-northeast-1.graph.cool/v1/' + GQ, 'graphql-subscriptions');
+  if(webSocket){
+    console.log('WebSocket is already open');
+    return Promise.resolve(webSocket);
+  }
+  
+  webSocket = new WebSocket(WSS_URL + GQ, WSS_PROTOCOL);
   
   webSocket.onopen = e => {
     webSocket.send(JSON.stringify({
@@ -87,6 +100,11 @@ function wsGQL({ GQ, token, queries = [], action, debug }) {
     }))
   }
   
+  // webSocket.onclose = () => {
+  //   isSocketConnected = false;
+  //   webSocket.close() // disable onclose handler first
+  // }
+  
   webSocket.onmessage = e => {
     const data = JSON.parse(e.data);
     
@@ -94,11 +112,17 @@ function wsGQL({ GQ, token, queries = [], action, debug }) {
       
       case 'init_success':
         debug && console.log('Fetchier wsGQL:', 'socket connected', { queries });
-        queries.forEach( (query, id) => webSocket.send(JSON.stringify({
-          id,
-          type: 'subscription_start',
-          query
-        })))
+        queries.forEach( (query, id) => {
+          webSocket.send(
+            JSON.stringify({
+              id,
+              type: 'subscription_start',
+              query
+            })
+          )
+        });
+        
+        return cb && cb(webSocket);
       break;
       
       case 'subscription_data':
@@ -108,15 +132,11 @@ function wsGQL({ GQ, token, queries = [], action, debug }) {
         action && action(keys.length && payload[keys.shift()])
       break;
       
-      case 'init_fail': {
-        throw {
+      case 'init_fail': 
+        return cb && cb(false, {
           message: 'init_fail returned from WebSocket server',
           data
-        }
-      }
-      
+        })
     }
   }
-  
-  return webSocket;
 }
