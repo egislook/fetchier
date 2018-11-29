@@ -25,14 +25,15 @@ async function GET({ url, body, method = 'GET', debug }){
   } catch(error){ throw error }
 }
 
-async function POST({ url, body = {}, debug }){
+async function POST({ url, body = {}, nocors, contentTypeForm, debug }){
   
   if(!url) 
     throw new Error('url is missing');
   
   const opts = {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    mode: nocors ? 'no-cors' : 'cors',
+    headers: { 'Content-Type': !contentTypeForm ? 'application/json; charset=utf-8' : 'application/x-www-form-urlencoded' },
     body: JSON.stringify(body)
   }
   
