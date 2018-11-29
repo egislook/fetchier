@@ -1,6 +1,6 @@
 {
   "name": "fetchier",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "data fetch wrapper",
   "main": "fetchier.js",
   "scripts": {
