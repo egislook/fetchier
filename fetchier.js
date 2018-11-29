@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 
 module.exports.GQL = GQL;
 module.exports.GET = GET;
+module.exports.POST = POST;
 module.exports.wsGQL = wsGQL;
 module.exports.fetch = fetch;
 
@@ -24,7 +25,7 @@ async function GET({ url, body, method = 'GET', debug }){
   } catch(error){ throw error }
 }
 
-async function POST({ url, body, debug }){
+async function POST({ url, body = {}, debug }){
   
   if(!url) 
     throw new Error('url is missing');
