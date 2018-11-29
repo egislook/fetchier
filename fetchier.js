@@ -12,6 +12,7 @@ const WSS_URL = 'wss://subscriptions.ap-northeast-1.graph.cool/v1/';
 const WSS_PROTOCOL = 'graphql-subscriptions';
 
 async function GET({ url, body, method = 'GET', debug }){
+  
   if(!url) 
     throw new Error('url is missing');
     
@@ -19,6 +20,25 @@ async function GET({ url, body, method = 'GET', debug }){
     const res = await fetch(url, { method, body: JSON.stringify(body) });
     const json = await res.json();
     debug && console.log('Fetchier GET:', { json });
+    return json;
+  } catch(error){ throw error }
+}
+
+async function POST({ url, body, debug }){
+  
+  if(!url) 
+    throw new Error('url is missing');
+  
+  const opts = {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
+  }
+  
+  try{
+    const res = await fetch(url, opts);
+    const json = await res.json();
+    debug && console.log('Fetchier POST:', { json, body });
     return json;
   } catch(error){ throw error }
 }
