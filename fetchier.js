@@ -45,10 +45,10 @@ async function POST({ url, body = {}, nocors, contentTypeForm, debug }){
   } catch(error){ throw error }
 }
 
-async function GQL({ query, GQ, token, variables, debug }){
+async function GQL({ query, GQ, url, token, variables, debug }){
   GQ = typeof ENV === 'object' && ENV.GQ || GQ;
   
-  const url = GQL_URL + GQ;
+  url = url || GQL_URL + GQ;
   
   const opts = {
     method: 'POST',
@@ -103,13 +103,15 @@ async function GQL({ query, GQ, token, variables, debug }){
 //   })
 // }
 
-function wsGQL({ GQ, token, queries = [], action, debug }, cb) {
+function wsGQL({ GQ, token, url, queries = [], action, debug }, cb) {
   GQ = typeof ENV === 'object' && ENV.GQ || GQ;
   
   if(webSocket){
     console.log('WebSocket is already open');
     return Promise.resolve(webSocket);
   }
+  
+  url = url || WSS_URL + GQ;
   
   webSocket = new WebSocket(WSS_URL + GQ, WSS_PROTOCOL);
   
