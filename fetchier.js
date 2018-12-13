@@ -10,7 +10,8 @@ let webSocket;
 
 const GQL_URL = 'https://api.graph.cool/simple/v1/';
 const WSS_URL = 'wss://subscriptions.ap-northeast-1.graph.cool/v1/';
-const WSS_PROTOCOL = 'graphql-subscriptions';
+const WSS_PROTOCOL = 'graphql-ws';
+const WSS_PROTOCOL_OLD = 'graphql-subscriptions';
 
 async function GET({ url, body, method = 'GET', debug }){
   
@@ -103,7 +104,7 @@ async function GQL({ query, GQ, url, token, variables, debug }){
 //   })
 // }
 
-function wsGQL({ GQ, token, url, protocol, queries = [], action, debug }, cb) {
+function wsGQL({ GQ, token, url, protocolOld, queries = [], action, debug }, cb) {
   GQ = typeof ENV === 'object' && ENV.GQ || GQ;
   
   if(webSocket){
@@ -113,14 +114,14 @@ function wsGQL({ GQ, token, url, protocol, queries = [], action, debug }, cb) {
   
   url = url || WSS_URL + GQ;
   
-  webSocket = new WebSocket(url, protocol || WSS_PROTOCOL);
+  webSocket = new WebSocket(url, protocolOld ? WSS_PROTOCOL_OLD : WSS_PROTOCOL);
   
   webSocket.onopen = e => {
     webSocket.send(JSON.stringify({
-      type: 'connection_init',
-      // payload: {
-      //   Authorization: `Bearer ${token}`
-      // }
+      type: protocolOld ? 'init' : 'connection_init',
+      payload: {
+        Authorization: `Bearer ${token}`
+      }
     }))
   }
   
@@ -136,6 +137,7 @@ function wsGQL({ GQ, token, url, protocol, queries = [], action, debug }, cb) {
     
     switch(data.type){
       
+      case 'init_success':
       case 'connection_ack':
         debug && console.log('Fetchier wsGQL:', 'socket connected', { queries });
         queries.forEach( (query, id) => {
@@ -145,6 +147,7 @@ function wsGQL({ GQ, token, url, protocol, queries = [], action, debug }, cb) {
         return cb && cb(webSocket);
       break;
       
+      case 'subscription_data':
       case 'data':
         const payload = data.payload.data;
         debug && console.log('Fetchier wsGQL:', { payload });
