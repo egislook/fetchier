@@ -113,7 +113,7 @@ function wsGQL({ GQ, token, url, queries = [], action, debug }, cb) {
   
   url = url || WSS_URL + GQ;
   
-  webSocket = new WebSocket(WSS_URL + GQ, WSS_PROTOCOL);
+  webSocket = new WebSocket(url, WSS_PROTOCOL);
   
   webSocket.onopen = e => {
     webSocket.send(JSON.stringify({
