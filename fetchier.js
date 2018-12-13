@@ -103,7 +103,7 @@ async function GQL({ query, GQ, url, token, variables, debug }){
 //   })
 // }
 
-function wsGQL({ GQ, token, url, queries = [], action, debug }, cb) {
+function wsGQL({ GQ, token, url, protocol, queries = [], action, debug }, cb) {
   GQ = typeof ENV === 'object' && ENV.GQ || GQ;
   
   if(webSocket){
@@ -113,7 +113,7 @@ function wsGQL({ GQ, token, url, queries = [], action, debug }, cb) {
   
   url = url || WSS_URL + GQ;
   
-  webSocket = new WebSocket(url, WSS_PROTOCOL);
+  webSocket = new WebSocket(url, protocol || WSS_PROTOCOL);
   
   webSocket.onopen = e => {
     webSocket.send(JSON.stringify({
