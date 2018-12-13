@@ -117,10 +117,10 @@ function wsGQL({ GQ, token, url, protocol, queries = [], action, debug }, cb) {
   
   webSocket.onopen = e => {
     webSocket.send(JSON.stringify({
-      type: 'init',
-      payload: {
-        Authorization: `Bearer ${token}`
-      }
+      type: 'connection_init',
+      // payload: {
+      //   Authorization: `Bearer ${token}`
+      // }
     }))
   }
   
@@ -132,31 +132,28 @@ function wsGQL({ GQ, token, url, protocol, queries = [], action, debug }, cb) {
   webSocket.onmessage = e => {
     const data = JSON.parse(e.data);
     
+    debug && console.log(data.type);
+    
     switch(data.type){
       
-      case 'init_success':
+      case 'connection_ack':
         debug && console.log('Fetchier wsGQL:', 'socket connected', { queries });
         queries.forEach( (query, id) => {
-          webSocket.send(
-            JSON.stringify({
-              id,
-              type: 'subscription_start',
-              query
-            })
-          )
+          webSocket.send( JSON.stringify({ id: String(id), type: 'start', payload: { query } }) )
         });
         
         return cb && cb(webSocket);
       break;
       
-      case 'subscription_data':
+      case 'data':
         const payload = data.payload.data;
         debug && console.log('Fetchier wsGQL:', { payload });
         const keys = Object.keys(payload);
         action && action(keys.length && payload[keys.shift()])
       break;
       
-      case 'init_fail': 
+      case 'init_fail':
+      case 'connection_error':
         return cb && cb(false, {
           message: 'init_fail returned from WebSocket server',
           data
