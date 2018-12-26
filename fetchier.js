@@ -26,7 +26,7 @@ async function GET({ url, body, method = 'GET', debug }){
   } catch(error){ throw error }
 }
 
-async function POST({ url, body = {}, nocors, contentTypeForm, debug }){
+async function POST({ url, body = {}, nocors, contentTypeForm, token, debug }){
   
   if(!url) 
     throw new Error('url is missing');
@@ -34,7 +34,10 @@ async function POST({ url, body = {}, nocors, contentTypeForm, debug }){
   const opts = {
     method: 'POST',
     mode: nocors ? 'no-cors' : 'cors',
-    headers: { 'Content-Type': !contentTypeForm ? 'application/json; charset=utf-8' : 'application/x-www-form-urlencoded' },
+    headers: { 
+      'content-type': !contentTypeForm ? 'application/json' : 'application/x-www-form-urlencoded',
+      ...(token && {'authorization':  `Bearer ${token}`} || {})
+    },
     body: JSON.stringify(body)
   }
   
