@@ -21,6 +21,10 @@ async function GET({ url, body, method = 'GET', debug }){
   try{
     const res = await fetch(url, { method, body: JSON.stringify(body) });
     const json = await res.json();
+    
+    if(res && res.status !== 200)
+      throw new Error(json);
+    
     debug && console.log('Fetchier GET:', { json });
     return json;
   } catch(error){ throw error }
@@ -44,6 +48,10 @@ async function POST({ url, body = {}, nocors, contentTypeForm, token, debug }){
   try{
     const res = await fetch(url, opts);
     const json = await res.json();
+    
+    if(res && res.status !== 200)
+      throw new Error(json);
+      
     debug && console.log('Fetchier POST:', { json, body });
     return json;
   } catch(error){ throw error }
