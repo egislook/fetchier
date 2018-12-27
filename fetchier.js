@@ -131,7 +131,11 @@ function wsGQL({ GQ, token, url, protocolOld, queries = [], action, debug }, cb)
     webSocket.send(JSON.stringify({
       type: protocolOld ? 'init' : 'connection_init',
       payload: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${token}`
+        }
       }
     }))
   }
@@ -169,7 +173,7 @@ function wsGQL({ GQ, token, url, protocolOld, queries = [], action, debug }, cb)
       case 'init_fail':
       case 'connection_error':
         return cb && cb(false, {
-          message: 'init_fail returned from WebSocket server',
+          message: 'init_fail from WebSocket',
           data
         })
     }
