@@ -3,6 +3,7 @@ const fetch = require('node-fetch');
 module.exports.GQL = GQL;
 module.exports.GET = GET;
 module.exports.POST = POST;
+module.exports.PUT = PUT;
 module.exports.wsGQL = wsGQL;
 module.exports.fetch = fetch;
 module.exports.wsGQLSubscribe = wsGQLSubscribe;
@@ -26,14 +27,14 @@ async function GET({ url, body, method = 'GET', headers = {}, debug }){
     const json = await res.json();
     
     if(res && res.status !== 200)
-      throw new Error(json);
+      throw json;
     
     debug && console.log('Fetchier GET:', { json });
     return json;
   } catch(error){ throw error }
 }
 
-async function POST({ url, body = {}, nocors, contentTypeForm, token, headers = {}, debug }){
+async function POST({ url, body = {}, nocors, contentTypeForm, jsonBody = true, token, headers = {}, debug }){
   
   if(!url) 
     throw new Error('url is missing');
@@ -46,7 +47,7 @@ async function POST({ url, body = {}, nocors, contentTypeForm, token, headers = 
       ...(token && {'authorization':  `Bearer ${token}`} || {}),
       ...headers
     },
-    body: JSON.stringify(body)
+    body: jsonBody ? JSON.stringify(body) : body
   }
   
   try{
@@ -54,11 +55,29 @@ async function POST({ url, body = {}, nocors, contentTypeForm, token, headers = 
     const json = await res.json();
     
     if(res && res.status !== 200)
-      throw new Error(json);
+      throw json;
       
     debug && console.log('Fetchier POST:', { json, body });
     return json;
   } catch(error){ throw error }
+}
+
+async function PUT({ url, body, method = 'PUT', jsonBody, headers = {}, debug}){
+  if(!url) 
+    throw new Error('url is missing');
+  
+  body = jsonBody ? JSON.stringify(body) : body;
+  
+  try{
+    const res = await fetch(url, { method, body, headers });
+    // const json = await res.json();
+    if(res && res.status !== 200)
+      throw res;
+    
+    debug && console.log('Fetchier PUT:', res);
+    return res;
+  } catch(error){ throw error }
+  
 }
 
 async function GQL({ query, GQ, url, token, variables, headers = {}, debug }){
