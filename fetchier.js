@@ -184,14 +184,14 @@ function wsGQLSubscribe({ url, subscription, debug }){
   
   return subscribe(subscription);
   
-  function subscribe({id, query, action}){
+  function subscribe({id, query, action, variables}){
     if(!webSocketSubscriptions[url])
       return console.warn('Fetchier wsGQLSubscribe', `"${id}"`, 'can not subscribe without existing socket', url);
     if(webSocketSubscriptions[url][id]) 
       return console.warn('Fetchier wsGQLSubscribe', `"${id}"`, 'subscription already exists');
     
     webSocketSubscriptions[url][id] = action;
-    const payload = { id: String(id), type: 'start', payload: { query } };
+    const payload = { id: String(id), type: 'start', payload: { query, variables } };
     if(!webSockets[url]) return;
     webSockets[url].send(JSON.stringify(payload));
     return debug && console.log('Fetchier wsGQLSubscribe start', id, url, payload);
