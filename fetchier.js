@@ -7,6 +7,7 @@ module.exports.PUT = PUT;
 module.exports.wsGQL = wsGQL;
 module.exports.fetch = fetch;
 module.exports.wsGQLSubscribe = wsGQLSubscribe;
+module.exports.wsGQLUnsubscribe = wsGQLUnsubscribe;
 module.exports.wsGQLclose = wsGQLclose;
 
 let webSockets = {};
@@ -210,7 +211,7 @@ function wsGQLSubscribe({ url, subscription, debug }){
 function wsGQLUnsubscribe({ url, id, debug }){
   delete webSocketSubscriptions[url][id];
   webSockets[url].send(JSON.stringify({ type: 'stop', id: String(id) }));
-  return debug && console.log('Fetchier wsGQLSubscribe start', id, url);
+  return debug && console.log('Fetchier wsGQLUnsubscribe stop', id, url);
 }
 
 function wsGQLclose(props = {}){
