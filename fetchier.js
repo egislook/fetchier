@@ -209,6 +209,8 @@ function wsGQLSubscribe({ url, subscription, debug }){
 }
 
 function wsGQLUnsubscribe({ url, id, debug }){
+  if(!webSocketSubscriptions[url] || webSocketSubscriptions[url] && !webSocketSubscriptions[url][id])
+    return;
   delete webSocketSubscriptions[url][id];
   webSockets[url].send(JSON.stringify({ type: 'stop', id: String(id) }));
   return debug && console.log('Fetchier wsGQLUnsubscribe stop', id, url);
