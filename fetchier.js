@@ -162,10 +162,10 @@ function wsGQL({ GQ, token, url, protocolOld, debug }, cb) {
         case 'data':
           const payload = data.payload.data;
           debug && console.log('Fetchier wsGQL:', { payload }, data);
-          const keys = Object.keys(payload);
+          const keys = typeof payload === 'object' ? Object.keys(payload) : [];
           
           const action = webSocketSubscriptions[url][data.id];
-          action && action(keys.length && payload[keys.shift()])
+          action && action(keys.length && payload[keys.shift()] || payload)
         break;
         
         case 'init_fail':
