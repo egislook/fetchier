@@ -160,7 +160,11 @@ function wsGQL({ GQ, token, url, protocolOld, debug }, cb) {
         
         case 'subscription_data':
         case 'data':
-          const payload = data.payload.data;
+          const payload = data && data.payload && data.payload.data;
+          
+          if(!payload) 
+            return debug && console.warn('Fetchier wsGQL issue:', data);
+            
           debug && console.log('Fetchier wsGQL:', { payload }, data);
           const keys = typeof payload === 'object' ? Object.keys(payload) : [];
           
