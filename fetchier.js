@@ -1,5 +1,16 @@
 const fetch = require('node-fetch');
 
+const WS = {
+  OPEN: wsGQL,
+  SUB: wsGQLSubscribe,
+  UNSUB: wsGQLUnsubscribe,
+  CLOSE: wsGQLclose
+}
+
+module.exports = {
+  GQL, GET, POST, PUT, wsGQL, wsGQLSubscribe, wsGQLUnsubscribe, wsGQLclose, WS
+}
+
 module.exports.GQL = GQL;
 module.exports.GET = GET;
 module.exports.POST = POST;
@@ -9,6 +20,7 @@ module.exports.fetch = fetch;
 module.exports.wsGQLSubscribe = wsGQLSubscribe;
 module.exports.wsGQLUnsubscribe = wsGQLUnsubscribe;
 module.exports.wsGQLclose = wsGQLclose;
+module.exports.WS = WS;
 
 let webSockets = {};
 let webSocketSubscriptions = {};
