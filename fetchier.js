@@ -233,18 +233,21 @@ function wsGQLUnsubscribe({ url, id, debug }){
 }
 
 function wsGQLclose(props = {}){
-  if(props.url && webSockets[props.url]){
-    webSockets[props.url].close();
-    delete webSockets[props.url];
-    delete webSocketSubscriptions[props.url];
-    return;
-  }
-  
-  for( let url in webSockets ){
-    webSockets[url].close();
-    delete webSockets[url];
-    delete webSocketSubscriptions[url];
-  }
-  
-  return;
+  return new Promise(( resolve, reject ) => {
+    
+    if(props.url && webSockets[props.url]){
+      webSockets[props.url].close();
+      delete webSockets[props.url];
+      delete webSocketSubscriptions[props.url];
+      return resolve();
+    }
+    
+    for( let url in webSockets ){
+      webSockets[url].close();
+      delete webSockets[url];
+      delete webSocketSubscriptions[url];
+    }
+    
+    return resolve();
+  })
 }
