@@ -30,13 +30,20 @@ const WSS_URL = 'wss://subscriptions.ap-northeast-1.graph.cool/v1/';
 const WSS_PROTOCOL = 'graphql-ws';
 const WSS_PROTOCOL_OLD = 'graphql-subscriptions';
 
-async function GET({ url, body, method = 'GET', headers = {}, debug }){
+async function GET({ url, body, method = 'GET', headers = {}, token, debug }){
   
   if(!url) 
     throw new Error('url is missing');
     
   try{
-    const res = await fetch(url, { method, body: JSON.stringify(body), headers });
+    const res = await fetch(url, { 
+      method, 
+      body: JSON.stringify(body), 
+      headers: {
+        ...(token && {'authorization':  `Bearer ${token}`} || {}),
+        ...headers
+      }
+    });
     const json = await res.json();
     
     if(res && res.status !== 200)
