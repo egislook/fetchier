@@ -129,7 +129,7 @@ async function GQL({ query, GQ, url, token, variables, headers = {}, debug }){
   return keys.length && json[keys.shift()];
 }
 
-function wsGQL({ GQ, token, url, protocolOld, debug }, cb) {
+function wsGQL({ GQ, token, url, protocolOld, debug, onError = console.error }, cb) {
   GQ = typeof ENV === 'object' && ENV.GQ || GQ;
   
   if(webSockets[url]){
@@ -190,6 +190,9 @@ function wsGQL({ GQ, token, url, protocolOld, debug }, cb) {
           const action = webSocketSubscriptions[url][data.id];
           action && action(keys.length && payload[keys.shift()] || payload)
         break;
+        
+        case 'error':
+          onError(data)
         
         case 'init_fail':
         case 'connection_error':
