@@ -45,6 +45,9 @@ function getStructure(obj, opts = {}, prevData = {}){
   return Object.keys(obj).map(field => {
     if(!obj[field] || typeof obj[field] !== 'object')
       return {[field]: obj[field]}
+      
+    if(Array.isArray(obj[field]))
+      return {[field]: getStructure(obj[field], opts, prevData[field] || {})}
     
     const { table, columns, key, prev } = getConstraints(field, obj[field], opts[field], prevData && prevData[field]);
     const data = getStructure(obj[field], opts, prevData[field] || {});
