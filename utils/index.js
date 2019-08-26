@@ -21,7 +21,7 @@ module.exports.diff = getDiff;
 module.exports.constraint = getConstraints;
 
 function upsert({ data, prev, opts, returning = 'id' }){
-  const structure = getStructure(getDiff(data, prev), opts, prev)
+  const structure = getStructure(prev && getDiff(data, prev) || data, opts, prev)
   const pkey = Object.keys(structure).shift();
   const query = getQuery(structure[pkey], returning)
   const variables = { ...structure[pkey] }
