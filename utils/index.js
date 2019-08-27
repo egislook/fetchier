@@ -42,14 +42,15 @@ function getQuery(structure, returning){
 }
 
 function getStructure(obj, opts = {}, prevData = {}){
-  return Object.keys(obj).map(field => {
+  const isArray = Array.isArray(obj);
+  const res = (isArray ? obj : Object.keys(obj)).map(field => {
+    if(isArray)
+      return getStructure(field, opts)
+    
     if(!obj[field] || typeof obj[field] !== 'object')
       return {[field]: obj[field]}
-      
-    if(Array.isArray(obj[field]))
-      return {[field]: getStructure(obj[field], opts, prevData[field] || {})}
     
-    const { table, columns, key, prev } = getConstraints(field, obj[field], opts[field], prevData && prevData[field]);
+    const { table, columns, key, prev } = getConstraints(field, (isArray ? obj[field][0] : obj[field]), opts[field], prevData && prevData[field]);
     const data = getStructure(obj[field], opts, prevData[field] || {});
     
     if(!Object.keys(data).length) return
@@ -63,7 +64,9 @@ function getStructure(obj, opts = {}, prevData = {}){
         }
       }
     }
-  }).reduce((o, k) => Object.assign(o, k), {})
+  })
+  
+  return isArray ? res : res.reduce((o, k) => Object.assign(o, k), {})
 }
 
 function setTail(field, tail = 's'){
