@@ -42,15 +42,14 @@ function getQuery(structure, returning){
 }
 
 function getStructure(obj, opts = {}, prevData = {}){
-  const isArray = Array.isArray(obj);
-  const res = (isArray ? obj : Object.keys(obj)).map(field => {
-    if(isArray)
-      return getStructure(field, opts)
+  const res = Object.keys(obj).map(field => {
+    
+    const isArray = Array.isArray(obj[field]);
     
     if(!obj[field] || typeof obj[field] !== 'object')
       return {[field]: obj[field]}
     
-    const { table, columns, key, prev } = getConstraints(field, (isArray ? obj[field][0] : obj[field]), opts[field], prevData && prevData[field]);
+    const { table, columns, key, prev } = getConstraints(field, !isArray ? obj[field] : obj[field][0], opts[field], prevData && prevData[field]);
     const data = getStructure(obj[field], opts, prevData[field] || {});
     
     if(!Object.keys(data).length) return
@@ -66,10 +65,15 @@ function getStructure(obj, opts = {}, prevData = {}){
     }
   })
   
-  return isArray ? res : res.reduce((o, k) => Object.assign(o, k), {})
+  if(Array.isArray(obj))
+    return res.reduce((a, item, key) => a.concat([item[key].data]), [])
+  
+  return res.reduce((o, item) => Object.assign(o, item), {})
 }
 
 function setTail(field, tail = 's'){
+  if((parseInt(field) + '') === field)
+    return field
   const lastChar = field.substr(-1);
   return lastChar === 's' 
     ? field
@@ -78,9 +82,10 @@ function setTail(field, tail = 's'){
 
 function getConstraints(field, obj, opts = {}, prev){
   field = setTail(field);
+  const columns = Object.keys(obj).filter(key => !obj[key] || typeof obj[key] !== 'object' ).concat(['id']);
   return {
     table: field.charAt(0).toUpperCase() + field.slice(1),
-    columns: Object.keys(obj).filter(key => !obj[key] || typeof obj[key] !== 'object' ).concat(['id']),
+    columns: [...new Set(columns)],
     key: 'pkey',
     prev,
     ...opts
@@ -101,6 +106,9 @@ function getDiff (data = {}, prev = {}) {
     
     // if(key === 'id')
     //   return obj[key] = data[key] === undefined ? prev[key] : data[key]
+    
+    Array.isArray(data[key])
+      return obj[key] = data[key]
     
     if(data[key] !== prev[key] && data[key] !== undefined)
       return obj[key] = data[key]
