@@ -23,16 +23,17 @@ module.exports.constraint = getConstraints;
 function upsert({ data, prev, opts, returning = 'id' }){
   const structure = getStructure(prev && getDiff(data, prev) || data, opts, prev)
   const pkey = Object.keys(structure).shift();
-  const query = getQuery(structure[pkey], returning)
+  const query = getQuery(structure[pkey], returning, opts && opts.schema)
   const variables = { ...structure[pkey] }
   
   return query && variables && { query, variables };
 }
 
-function getQuery(structure, returning){
+function getQuery(structure, returning, schema){
   if(!structure) return
   const { data, on_conflict } = structure;
-  const table = on_conflict.constraint.replace('_pkey', '')
+  let table = on_conflict.constraint.replace('_pkey', '')
+  if(schema) table = [schema, table].join('_')
   return `mutation ($data: [${table}_insert_input!]!, $on_conflict: ${table}_on_conflict) {
     insert_${table}(
       objects: $data, 
