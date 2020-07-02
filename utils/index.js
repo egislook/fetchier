@@ -55,6 +55,8 @@ function getStructure(obj, opts = {}, prevData = {}){
     
     if(!Object.keys(data).length) return
     if(prev && prev.id) data.id = prev.id
+
+    data && delete data['updatedAt']
     return {
       [setTail(field)]: { 
         data,
