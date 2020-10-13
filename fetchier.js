@@ -85,22 +85,20 @@ async function POST({ url, method = 'POST', body = {}, nocors, contentTypeForm, 
   } catch(error){ throw error }
 }
 
-async function oPUT({ url, body, method = 'PUT', jsonBody, headers = {}, debug}){
+async function oPUT({ url, body, method = 'PUT', headers = {}, debug}){
   if(!url)
     throw new Error('url is missing');
 
-  body = jsonBody ? JSON.stringify(body) : body;
-
   try{
-    const res = await fetch(url, { method, body, headers });
+    const res = await fetch(url, { method, body: JSON.stringify(body), headers });
 
     if(res && ![200, 204].includes(res.status))
       throw res;
 
     debug && console.log('Fetchier PUT:', res);
-    return await res.json();
+    const json = await res.json()
+    return json;
   } catch(error){ throw error }
-
 }
 
 async function GQL({ query, GQ, url, token, variables, headers = {}, debug }){
