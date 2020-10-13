@@ -8,13 +8,15 @@ const WS = {
 }
 
 module.exports = {
-  GQL, GET, DELETE: GET, POST, PUT: POST, wsGQL, wsGQLSubscribe, wsGQLUnsubscribe, wsGQLclose, WS
+  GQL, GET, DELETE: GET, POST, PUT: POST, wsGQL, wsGQLSubscribe, wsGQLUnsubscribe, wsGQLclose, WS,
+  oPUT
 }
 
 module.exports.GQL = GQL;
 module.exports.GET = GET;
 module.exports.POST = POST;
 module.exports.PUT = POST;
+module.exports.oPUT = oPUT;
 module.exports.DELETE = GET;
 module.exports.wsGQL = wsGQL;
 module.exports.fetch = fetch;
@@ -47,7 +49,7 @@ async function GET({ url, body, method = 'GET', headers = {}, token, debug }){
     });
     const json = await res.json();
 
-    if(res && res.status !== 200)
+    if(res && ![200, 204].includes(res.status))
       throw json;
 
     debug && console.log('Fetchier ' + method + ':', { json });
@@ -75,7 +77,7 @@ async function POST({ url, method = 'POST', body = {}, nocors, contentTypeForm, 
     const res = await fetch(url, opts);
     const json = jsonBody ? await res.json() : await res.text()
 
-    if(res && res.status !== 200)
+    if(res && ![200, 204].includes(res.status))
       throw json;
 
     debug && console.log('Fetchier ' + method + ':', { json, body });
@@ -83,23 +85,23 @@ async function POST({ url, method = 'POST', body = {}, nocors, contentTypeForm, 
   } catch(error){ throw error }
 }
 
-// async function PUT({ url, body, method = 'PUT', jsonBody, headers = {}, debug}){
-//   if(!url)
-//     throw new Error('url is missing');
-//
-//   body = jsonBody ? JSON.stringify(body) : body;
-//
-//   try{
-//     const res = await fetch(url, { method, body, headers });
-//     // const json = await res.json();
-//     if(res && res.status !== 200)
-//       throw res;
-//
-//     debug && console.log('Fetchier PUT:', res);
-//     return res;
-//   } catch(error){ throw error }
-//
-// }
+async function oPUT({ url, body, method = 'PUT', jsonBody, headers = {}, debug}){
+  if(!url)
+    throw new Error('url is missing');
+
+  body = jsonBody ? JSON.stringify(body) : body;
+
+  try{
+    const res = await fetch(url, { method, body, headers });
+
+    if(res && ![200, 204].includes(res.status))
+      throw res;
+
+    debug && console.log('Fetchier PUT:', res);
+    return await res.json();
+  } catch(error){ throw error }
+
+}
 
 async function GQL({ query, GQ, url, token, variables, headers = {}, debug }){
   GQ = typeof ENV === 'object' && ENV.GQ || GQ;
