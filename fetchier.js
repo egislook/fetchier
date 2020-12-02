@@ -8,15 +8,13 @@ const WS = {
 }
 
 module.exports = {
-  GQL, GET, DELETE: GET, POST, PUT: POST, wsGQL, wsGQLSubscribe, wsGQLUnsubscribe, wsGQLclose, WS,
-  oPUT
+  GQL, GET, DELETE: GET, POST, PUT: POST, wsGQL, wsGQLSubscribe, wsGQLUnsubscribe, wsGQLclose, WS
 }
 
 module.exports.GQL = GQL;
 module.exports.GET = GET;
 module.exports.POST = POST;
 module.exports.PUT = POST;
-module.exports.oPUT = oPUT;
 module.exports.DELETE = GET;
 module.exports.wsGQL = wsGQL;
 module.exports.fetch = fetch;
@@ -27,6 +25,8 @@ module.exports.WS = WS;
 
 let webSockets = {};
 let webSocketSubscriptions = {};
+
+let httpSuccessCodes = [...Array(9).keys(), 26].map(i => 200 + i)
 
 const GQL_URL = 'https://api.graph.cool/simple/v1/';
 const WSS_URL = 'wss://subscriptions.ap-northeast-1.graph.cool/v1/';
@@ -49,7 +49,7 @@ async function GET({ url, body, method = 'GET', headers = {}, token, debug }){
     });
     const json = await res.json();
 
-    if(res && ![200, 204].includes(res.status))
+    if(res && !httpSuccessCodes.includes(res.status))
       throw json;
 
     debug && console.log('Fetchier ' + method + ':', { json });
@@ -77,26 +77,10 @@ async function POST({ url, method = 'POST', body = {}, nocors, contentTypeForm, 
     const res = await fetch(url, opts);
     const json = jsonBody ? await res.json() : await res.text()
 
-    if(res && ![200, 204].includes(res.status))
+    if(res && !httpSuccessCodes.includes(res.status))
       throw json;
 
     debug && console.log('Fetchier ' + method + ':', { json, body });
-    return json;
-  } catch(error){ throw error }
-}
-
-async function oPUT({ url, body, method = 'PUT', headers = {}, debug}){
-  if(!url)
-    throw new Error('url is missing');
-
-  try{
-    const res = await fetch(url, { method, body: JSON.stringify(body), headers });
-
-    if(res && ![200, 204].includes(res.status))
-      throw res;
-
-    debug && console.log('Fetchier PUT:', res);
-    const json = await res.json()
     return json;
   } catch(error){ throw error }
 }
